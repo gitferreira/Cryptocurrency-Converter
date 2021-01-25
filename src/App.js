@@ -1,7 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
+import axios from "axios";
 import image from "./cryptomonedas.png";
 import Form from "./components/Form";
+import Result from "./components/Result";
+import Spinner from "./components/Spinner";
 
 const Container = styled.div`
   max-width: 900px;
@@ -37,6 +40,37 @@ const Heading = styled.h1`
 `;
 
 function App() {
+  const [currencyData, setCurrencyData] = useState("");
+  const [cryptoCurrencyData, setCryptoCurrencyData] = useState("");
+  const [result, setResult] = useState({});
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const convert = async () => {
+      //Avoid first execution
+      if (currencyData === "") return;
+
+      //Consume API
+      const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${cryptoCurrencyData}&tsyms=${currencyData}`;
+      const result = await axios.get(url);
+
+      //Spinner
+      setLoading(true);
+
+      setTimeout(() => {
+        setLoading(false);
+        setResult(result.data.DISPLAY[cryptoCurrencyData][currencyData]);
+      }, 2000);
+
+      // console.log(result.data.DISPLAY[cryptoCurrencyData][currencyData]);
+    };
+    convert();
+  }, [currencyData, cryptoCurrencyData]);
+
+  //Show Spinner
+
+  const component = loading ? <Spinner /> : <Result result={result} />;
+
   return (
     <Container>
       <div>
@@ -44,7 +78,11 @@ function App() {
       </div>
       <div>
         <Heading>Cryptocurrency Converter</Heading>
-        <Form />
+        <Form
+          setCurrencyData={setCurrencyData}
+          setCryptoCurrencyData={setCryptoCurrencyData}
+        />
+        {component}
       </div>
     </Container>
   );
