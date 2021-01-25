@@ -48,3 +48,4 @@ const useCoin = (label, initialState, options) => {
 };
 
 export default useCoin;
+ 
